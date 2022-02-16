@@ -164,7 +164,7 @@ async def input_time(message: types.Message, state=FSMContext):
         obs_time = datetime.strptime(message.text.strip(), "%d %m %Y %H %M")
         await message.answer(obs_time)
 
-        sunset, sunrise, weather_msg, userdata = await get_curr_weather(message)
+        sunset, sunrise, localnow, weather_msg, userdata = await get_curr_weather(message)
         if weather_msg:
             await send_status_init(message, userdata, obs_time)
             solar_sys = await get_astro_data(lat=userdata[1], lon=userdata[2], obs_time=obs_time)
