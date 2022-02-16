@@ -72,8 +72,9 @@ async def fetch_current_weather(lat, lon):
 
         async with session.get(api_url, params=params) as resp:
             data = await resp.json()
-            sunrise = datetime.utcfromtimestamp(data['sys']['sunrise'] + 10800)
-            sunset = datetime.utcfromtimestamp(data['sys']['sunset'] + 10800)
+            # print(json.dumps(data, indent=4))
+            sunrise = datetime.utcfromtimestamp(data['sys']['sunrise'] + data['timezone'])
+            sunset = datetime.utcfromtimestamp(data['sys']['sunset'] + data['timezone'])
             weather = data['weather'][0]['description']
             temp = round(data['main']['temp'], 1)
             pressure = round(data['main']['pressure']*0.75)
@@ -87,6 +88,7 @@ async def fetch_current_weather(lat, lon):
             rain = data["rain"]["1h"] if "rain" in data.keys() else 0
             snow = data["snow"]["1h"] if "snow" in data.keys() else 0
             precip = get_precip(rain, snow)
+
 
             msg = f"Закат в {sunset.strftime('%H:%M')}, восход в {sunrise.strftime('%H:%M')}\n{weather.capitalize()}, " \
                   f"{precip}\nТемпература: {temp} ℃\nДавление: {pressure} мм рт. ст.\nВлажность: {humid} %\n" \
