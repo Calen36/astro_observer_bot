@@ -98,7 +98,6 @@ async def send_status_init(message, userdata, obs_time):
 async def status_now(message: types.Message):
     sunset, sunrise, obs_time, weather_msg, userdata = await get_curr_weather(message)
     if weather_msg:
-        print('!D!',)
         await send_status_init(message, userdata, obs_time)
         await message.answer(weather_msg, reply_markup=main_kbd)
         solar_sys = await get_astro_data(lat=userdata[1], lon=userdata[2], obs_time=obs_time)
@@ -113,7 +112,6 @@ async def status_evening(message: types.Message):
             obs_time += timedelta(days=1)
         await send_status_init(message, userdata, obs_time)
         forecast_msg = await fetch_forecast(userdata[1], userdata[2], obs_time)
-        print('!!!', forecast_msg)
         try:
             await message.answer(forecast_msg, reply_markup=main_kbd)
         except Exception as ex:
