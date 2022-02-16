@@ -88,12 +88,13 @@ async def fetch_current_weather(lat, lon):
             rain = data["rain"]["1h"] if "rain" in data.keys() else 0
             snow = data["snow"]["1h"] if "snow" in data.keys() else 0
             precip = get_precip(rain, snow)
+            localnow = datetime.utcfromtimestamp(data['dt'] + data['timezone'])
 
 
             msg = f"Закат в {sunset.strftime('%H:%M')}, восход в {sunrise.strftime('%H:%M')}\n{weather.capitalize()}, " \
                   f"{precip}\nТемпература: {temp} ℃\nДавление: {pressure} мм рт. ст.\nВлажность: {humid} %\n" \
                   f"Видимость {visib} м\nВетер {w_dir}{wind} м/с\nОблачность {clouds}%\n"
-            return sunset, sunrise, msg
+            return sunset, sunrise, localnow, msg
 
 
 async def fetch_forecast(lat, lon, time):

@@ -82,11 +82,11 @@ async def input_latlon(message: types.Message, state=FSMContext):
 async def get_curr_weather(message):
     userdata = await get_user(message.from_user.id)
     if userdata and all(userdata[:3]):  # проверяем, что местоположение задано
-        sunset, sunrise, msg = await fetch_current_weather(userdata[1], userdata[2])
-        return sunset, sunrise, msg, userdata
+        sunset, sunrise, localnow, msg = await fetch_current_weather(userdata[1], userdata[2])
+        return sunset, sunrise, localnow, msg, userdata
     else:
         await message.answer('Сначала задайте местоположение', reply_markup=location_kbd)
-        return None, None, None, None
+        return None, None, None, None, None
 
 
 async def send_status_init(message, userdata, obs_time):
@@ -96,9 +96,9 @@ async def send_status_init(message, userdata, obs_time):
 
 
 async def status_now(message: types.Message):
-    sunset, sunrise, weather_msg, userdata = await get_curr_weather(message)
+    sunset, sunrise, obs_time, weather_msg, userdata = await get_curr_weather(message)
     if weather_msg:
-        obs_time = datetime.now()
+        print('!D!',)
         await send_status_init(message, userdata, obs_time)
         await message.answer(weather_msg, reply_markup=main_kbd)
         solar_sys = await get_astro_data(lat=userdata[1], lon=userdata[2], obs_time=obs_time)
@@ -106,11 +106,10 @@ async def status_now(message: types.Message):
 
 
 async def status_evening(message: types.Message):
-    sunset, sunrise, _, userdata = await get_curr_weather(message)
-    now = datetime.now()
+    sunset, sunrise, localnow, _, userdata = await get_curr_weather(message)
     if sunset:
         obs_time = sunset + timedelta(hours=1)
-        if now - timedelta(hours=3) > obs_time:
+        if localnow - timedelta(hours=3) > obs_time:
             obs_time += timedelta(days=1)
         await send_status_init(message, userdata, obs_time)
         forecast_msg = await fetch_forecast(userdata[1], userdata[2], obs_time)
@@ -126,8 +125,7 @@ async def status_evening(message: types.Message):
 
 
 async def status_midnight(message: types.Message):
-    sunset, sunrise, _, userdata = await get_curr_weather(message)
-    now = datetime.now()
+    sunset, sunrise, localnow, _, userdata = await get_curr_weather(message)
     if sunset:
         sunset_h = int(sunset.strftime("%H"))
         sunset_m = int(sunset.strftime("%M"))
@@ -135,7 +133,7 @@ async def status_midnight(message: types.Message):
         sunrise_m = int(sunrise.strftime("%M"))
         delta = ((sunrise_h + 24 - sunset_h) * 60 + sunrise_m - sunset_m) // 2  # кол-во минут от заката до середины ночи
         obs_time = sunset + timedelta(minutes=delta)
-        if now - timedelta(hours=3) > obs_time:
+        if localnow - timedelta(hours=3) > obs_time:
             obs_time += timedelta(days=1)
         await send_status_init(message, userdata, obs_time)
         forecast_msg = await fetch_forecast(userdata[1], userdata[2], obs_time)
@@ -145,11 +143,10 @@ async def status_midnight(message: types.Message):
 
 
 async def status_morning(message: types.Message):
-    sunset, sunrise, _, userdata = await get_curr_weather(message)
+    sunset, sunrise, localnow, _, userdata = await get_curr_weather(message)
     if sunrise:
-        now = datetime.now()
         obs_time = sunrise - timedelta(hours=1)
-        if now - timedelta(hours=3) > obs_time:
+        if localnow - timedelta(hours=3) > obs_time:
             obs_time += timedelta(days=1)
         await send_status_init(message, userdata, obs_time)
         forecast_msg = await fetch_forecast(userdata[1], userdata[2], obs_time)
