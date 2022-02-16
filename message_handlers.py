@@ -106,20 +106,21 @@ async def status_now(message: types.Message):
 
 
 async def status_evening(message: types.Message):
-    sunset, sunrise, _, userdata = await get_curr_weather(message)
-    now = datetime.now()
-    if sunset:
-        obs_time = sunset + timedelta(hours=1)
-        if now - timedelta(hours=3) > obs_time:
-            obs_time += timedelta(days=1)
-        await send_status_init(message, userdata, obs_time)
-        try:
+    try:
+        sunset, sunrise, _, userdata = await get_curr_weather(message)
+        now = datetime.now()
+        if sunset:
+            obs_time = sunset + timedelta(hours=1)
+            if now - timedelta(hours=3) > obs_time:
+                obs_time += timedelta(days=1)
+            await send_status_init(message, userdata, obs_time)
             forecast_msg = await fetch_forecast(userdata[1], userdata[2], obs_time)
-        except:
-            forecast_msg = "БЛЯ!"
-        await message.answer(forecast_msg, reply_markup=main_kbd)
-        solar_sys = await get_astro_data(lat=userdata[1], lon=userdata[2], obs_time=obs_time)
-        await message.answer(solar_sys, reply_markup=main_kbd)
+            await message.answer(forecast_msg, reply_markup=main_kbd)
+            solar_sys = await get_astro_data(lat=userdata[1], lon=userdata[2], obs_time=obs_time)
+            await message.answer(solar_sys, reply_markup=main_kbd)
+    except Exception as ex:
+        print(ex)
+
 
 
 async def status_midnight(message: types.Message):
