@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timedelta
 from config import WEATHER_ID
 import aiohttp
@@ -105,6 +106,7 @@ async def fetch_forecast(lat, lon, time):
             for data in forecasts['list']:
                 forecast_time = datetime.strptime(data['dt_txt'], "%Y-%m-%d %H:%M:%S")
                 if max(time, forecast_time) - min(time, forecast_time) < timedelta(minutes=91):
+                    print(json.dumps(data, indent=4))
 
                     weather = data['weather'][0]['description']
                     temp = round(data['main']['temp'], 1)
@@ -116,8 +118,21 @@ async def fetch_forecast(lat, lon, time):
                     w_dir = wind_dir(deg)
                     clouds = data['clouds']['all']
                     cloudiness = get_cloudiness(clouds)
-                    rain = data["rain"]["1h"] if "rain" in data.keys() else 0
-                    snow = data["snow"]["1h"] if "snow" in data.keys() else 0
+                    try:
+                        rain = data["rain"]["1h"]
+                    except KeyError:
+                        try:
+                            rain = data["rain"]["3h"] / 3
+                        except KeyError:
+                            rain = 0
+                    try:
+                        snow = data["snow"]["1h"]
+                    except KeyError:
+                        try:
+                            snow = data["snow"]["3h"] / 3
+                        except KeyError:
+                            snow = 0
+
                     precip = get_precip(rain, snow)
                     time = data['dt_txt']
 
