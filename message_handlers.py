@@ -114,6 +114,7 @@ async def status_evening(message: types.Message):
             obs_time += timedelta(days=1)
         await send_status_init(message, userdata, obs_time)
         forecast_msg = await fetch_forecast(userdata[1], userdata[2], obs_time)
+        print('!!!', forecast_msg)
         try:
             await message.answer(forecast_msg, reply_markup=main_kbd)
         except Exception as ex:
