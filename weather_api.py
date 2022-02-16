@@ -24,33 +24,38 @@ def get_cloudiness(percent):
     return "сплошная облачность"
 
 
-def rainfall(mm):
-    for amount in ((0.01, f"без существенных осадков ({mm} за час)"), (0.033, f"небольшой дождь ({mm} за час)"), (1.25, f"дождь ({mm} за час)"), (4.17, f"сильный дождь ({mm} за час)")):
-        if mm < amount[0]:
-            return amount[1]
-    return f"очень сильный дождь ({mm} за час)"
-
-
-def snowfall(mm):
-    for amount in ((0.003, f"без существенных осадков ({mm} за час)"), (0.17, f"небольшой снег ({mm} за час)"), (0.5, f"снег ({mm} за час)"), (1.6, f"сильный снег ({mm} за час)")):
-        if mm < amount[0]:
-            return amount[1]
-    return f"очень сильный снег ({mm} за час)"
-
+# def rainfall(mm):
+#     mm = round(mm, 2)
+#     for amount in ((0.01, f"без существенных осадков"), (0.033, f"небольшой дождь"), (1.25, f"дождь"), (4.17, f"сильный дождь")):
+#         if mm < amount[0]:
+#             return amount[1] + f" ({mm}мм за час)"
+#     return f"очень сильный дождь ({mm} за час)"
+#
+#
+# def snowfall(mm):
+#     mm = round(mm, 2)
+#     for amount in ((0.003, f"без существенных осадков"), (0.17, f"небольшой снег"), (0.5, f"снег"), (1.6, f"сильный снег")):
+#         if mm < amount[0]:
+#             return amount[1] + f" ({mm}мм за час)"
+#     return f"очень сильный снег ({mm} за час)"
+#
+#
+# def get_precip(rain, snow):
+#     if rain == snow == 0:
+#         return "без осадков"
+#     if rain == 0:
+#         return snowfall(snow)
+#     if snow == 0:
+#         return rainfall(rain)
+#     mm = round(rain + snow, 2)
+#     for amount in ((0.01, f"без существенных осадков"), (0.03, f"небольшой дождь со снегом"),
+#                    (1.15, f"дождь со снегом"), (4, f"сильный дождь со снегом")):
+#         if mm < amount[0]:
+#             return amount[1] + f" ({mm}мм за час)"
+#     return f"очень сильный дождь со снегом ({mm} за час)"
 
 def get_precip(rain, snow):
-    if rain == snow == 0:
-        return "без осадков"
-    if rain == 0:
-        return snowfall(snow)
-    if snow == 0:
-        return rainfall(rain)
-    mm = rain + snow
-    for amount in ((0.01, f"без существенных осадков ({mm} за час)"), (0.03, f"небольшой дождь со снегом ({mm} за час)"),
-                   (1.15, f"дождь со снегом ({mm} за час)"), (4, f"сильный дождь со снегом ({mm} за час)")):
-        if mm < amount[0]:
-            return amount[1]
-    return f"очень сильный дождь со снегом ({mm} за час)"
+    return f" ({round(rain+snow, 1)}мм за час)" if rain+snow > 0 else ""
 
 
 async def fetch_current_weather(lat, lon):
@@ -135,7 +140,7 @@ async def fetch_forecast(lat, lon, time):
                     precip = get_precip(rain, snow)
                     time = data['dt_txt']
 
-                    msg = f"{weather.capitalize()}, {precip}\nТемпература: {temp} ℃\nДавление: {pressure}" \
+                    msg = f"{weather.capitalize()} {precip}\nТемпература: {temp} ℃\nДавление: {pressure}" \
                           f" мм рт. ст.\nВлажность: {humid} %\nВидимость {visib} м\nВетер {w_dir}{wind}" \
                           f" м/с\nОблачность {clouds}%\n"
                     return msg
