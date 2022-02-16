@@ -14,7 +14,7 @@ ru_obj_names = {'Moon': 'Луна', 'Sun': 'Солнце', 'Mercury': 'Мерк�
 
 ru_phases = {'New Moon': '🌑 Новолуние', 'Waxing Crescent': '🌒 Молодая луна', 'First Quarter': '🌓 Первая Четверть',
              'Waxing Gibbous': '🌔 Прибывающая луна', 'Full Moon': '🌕 Полнолуние', 'Waning Gibbous': '🌖 Убывающая луна',
-             'Last Quarter': '🌗 Последняя четверть', 'Waning Сrescent': '🌘 Старая луна'}
+             'Last Quarter': '🌗 Последняя четверть', 'Waning Crescent': '🌘 Старая луна'}
 
 ru_constellations = {'and': 'Андромеда', 'gem': 'Близнецы', 'uma': 'Большая Медведица', 'cma': 'Большой Пёс',
                      'lib': 'Весы', 'aqr': 'Водолей', 'aur': 'Возничий', 'lup': 'Волк', 'boo': 'Волопас',
@@ -59,6 +59,7 @@ async def get_astro_data(lat, lon, obs_time):
     async with aiohttp.ClientSession() as session:
         async with session.get(api_url, headers=headers, params=params) as resp:
             data = await resp.json()
+            # print(json.dumps(data, indent=4))
             return parse_astro_data(data)
 
 
