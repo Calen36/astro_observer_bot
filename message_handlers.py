@@ -233,6 +233,10 @@ async def admin(message: types.Message):
             await message.reply(f"{msg[1]} разбанен")
         else:
             await message.reply(f"{msg[1]} не найден")
+    elif msg[0] == 'SHOW' and msg[1] == 'USERS':
+        users = await get_users()
+        msg = '\n'.join([' '.join(map(str, u)) for u in users])
+        await message.reply(f"Всего: {len(users)}\n{msg}")
 
 
 async def ban(message: types.Message):

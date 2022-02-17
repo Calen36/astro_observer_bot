@@ -50,9 +50,9 @@ async def unban_user(uid):
 
 async def get_users():
     async with aiosqlite.connect('astro.db') as db:
-        async with db.execute(f"SELECT uid FROM users") as cursor:
+        async with db.execute(f"SELECT * FROM users") as cursor:
             rows = await cursor.fetchall()
-            rows = [x[0] for x in rows]
+            # rows = [x[0] for x in rows]
             return rows
 
 
