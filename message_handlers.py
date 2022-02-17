@@ -211,14 +211,14 @@ async def admin(message: types.Message):
     msg = message.text.split()
     if msg[0] == 'SEND':
         if msg[1].startswith('@'):
-            uid = await get_uid(msg[1][1:])
+            uid = await get_uid(msg[1])
             if uid:
                 await bot.send_message(chat_id=uid, text=f"{' '.join(msg[2:])}")
                 await message.reply('Отправлено.')
             else:
                 await message.reply('пользователь не найден')
     elif msg[0] == 'BAN' and msg[1].startswith('@'):
-        uid = await get_uid(msg[1][1:])
+        uid = await get_uid(msg[1])
         if uid and uid != DEV_CHAT_ID:
             await ban_user(uid)
             BANLIST = await get_banned()
@@ -226,7 +226,7 @@ async def admin(message: types.Message):
         else:
             await message.reply(f"{msg[1]} не найден")
     elif msg[0] == 'UNBAN' and msg[1].startswith('@'):
-        uid = await get_uid(msg[1][1:])
+        uid = await get_uid(msg[1])
         if uid:
             await unban_user(uid)
             BANLIST = await get_banned()
