@@ -53,7 +53,7 @@ async def catch_location(message: types.Message):
     lat = message.location.latitude
     lon = message.location.longitude
     try:
-        username = message.from_user['username']
+        username = '@' + message.from_user['username']
     except KeyError:
         username = ''
     await update_user(message.from_user.id, str(lat), str(lon), name=username)
@@ -70,7 +70,7 @@ async def input_latlon(message: types.Message, state=FSMContext):
     """Parces inputed location"""
     result = await get_geodata(message.text)
     try:
-        username = message.from_user['username']
+        username = '@' + message.from_user['username']
     except KeyError:
         username = ''
 
