@@ -20,12 +20,23 @@ def sync_get_banned():
         return [x[0] for x in rows]
 
 
-async def get_banned():
+async def get_banlist():
     try:
         async with aiosqlite.connect('astro.db') as db:
-            async with db.execute(f"SELECT uid FROM banlist") as cursor:
+            async with db.execute("SELECT * from banlist") as cursor:
                 rows = await cursor.fetchall()
                 return [x[0] for x in rows]
+    except Exception as ex:
+        print(ex)
+
+
+async def get_banned_names():
+    try:
+        async with aiosqlite.connect('astro.db') as db:
+            query = "SELECT banlist.uid, name FROM banlist LEFT JOIN users ON banlist.uid = users.uid;"
+            async with db.execute(query) as cursor:
+                rows = await cursor.fetchall()
+                return [f"{x[0]} {x[1]}" for x in rows]
     except Exception as ex:
         print(ex)
 

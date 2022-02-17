@@ -8,7 +8,7 @@ from geo_api import get_geodata
 from weather_api import fetch_current_weather, fetch_forecast, ru_month
 from astro_api import get_astro_data
 from nasa_api import get_apod
-from db import get_users, get_user, update_user, get_uid, ban_user, unban_user, get_banned
+from db import get_users, get_user, update_user, get_uid, ban_user, unban_user, get_banlist, get_banned_names
 
 import lat_lon_parser
 from datetime import datetime, timedelta
@@ -221,7 +221,7 @@ async def admin(message: types.Message):
         uid = await get_uid(msg[1])
         if uid and uid != DEV_CHAT_ID:
             await ban_user(uid)
-            BANLIST = await get_banned()
+            BANLIST = await get_banlist()
             await message.reply(f"{msg[1]} забанен")
         else:
             await message.reply(f"{msg[1]} не найден")
@@ -229,14 +229,17 @@ async def admin(message: types.Message):
         uid = await get_uid(msg[1])
         if uid:
             await unban_user(uid)
-            BANLIST = await get_banned()
+            BANLIST = await get_banlist()
             await message.reply(f"{msg[1]} разбанен")
         else:
             await message.reply(f"{msg[1]} не найден")
     elif msg[0] == 'SHOW' and msg[1] == 'USERS':
         users = await get_users()
-        msg = '\n'.join([' '.join(map(str, u)) for u in users])
-        await message.reply(f"Всего: {len(users)}\n{msg}")
+        reply_msg = '\n'.join([' '.join(map(str, u)) for u in users])
+        await message.reply(f"Всего: {len(users)}\n{reply_msg}")
+    elif msg[0] == 'SHOW' and msg[1] == 'BANLIST':
+        reply_msg = await get_banned_names()
+        await message.reply("\n".join(reply_msg))
 
 
 async def ban(message: types.Message):
