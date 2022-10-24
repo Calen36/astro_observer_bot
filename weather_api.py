@@ -5,10 +5,11 @@ import aiohttp
 
 
 ru_month = {'01': 'января', '02': 'февраля', '03': 'марта', '04': 'апреля', '05': 'мая', '06': 'июня', '07': 'июля',
-              '08': 'августа', '09': 'сентября', '10': 'октября', '11': 'ноября', '12': 'декабря'}
+            '08': 'августа', '09': 'сентября', '10': 'октября', '11': 'ноября', '12': 'декабря'}
 
 
-def wind_dir(deg):
+def wind_dir(deg: float) -> str:
+    """Возвращает словесное описание направления ветра изходя из азимута"""
     for diection in ((22.5, "южный "), (67.5, "юго-западный "), (112.5, "западный "), (157.5, "северо-западный "),
                      (202.5, "северный "), (247.50, "северо-восточный "), (292.50, "восточный "), (337.50, "юго-восточный ")):
         if deg <= diection[0]:
@@ -16,7 +17,8 @@ def wind_dir(deg):
     return "южный "
 
 
-def get_cloudiness(percent):
+def get_cloudiness(percent: int) -> str:
+    """Возвращает словесное описание облачности исходя из процентного показатля"""
     for state in ((2, "ясно"), (25, "малооблачно"), (50, "рассеянная облачность"),
                   (75, "облчачно с прояснениями"), (98, 'облачно')):
         if percent < state[0]:
@@ -54,11 +56,13 @@ def get_cloudiness(percent):
 #             return amount[1] + f" ({mm}мм за час)"
 #     return f"очень сильный дождь со снегом ({mm} за час)"
 
-def get_precip(rain, snow):
+def get_precip(rain: int, snow: int):
+    """Возвращает словесное описание количества осадков исходя из миллиметров дождя и снега"""
     return f" ({round(rain+snow, 1)}мм за час)" if rain+snow > 0 else ""
 
 
-async def fetch_current_weather(lat, lon):
+async def fetch_current_weather(lat: str, lon: str) -> tuple[datetime, datetime, datetime, str]:
+    """Обращается к API openwheathermap, получает текущую погоду и формирует описание"""
     api_url = "http://api.openweathermap.org/data/2.5/weather"
     params = {
         'lat': lat,
@@ -69,10 +73,9 @@ async def fetch_current_weather(lat, lon):
     }
 
     async with aiohttp.ClientSession() as session:
-
         async with session.get(api_url, params=params) as resp:
             data = await resp.json()
-            # print(json.dumps(data, indent=4))
+            print(json.dumps(data, indent=4))
             sunrise = datetime.utcfromtimestamp(data['sys']['sunrise'] + data['timezone'])
             sunset = datetime.utcfromtimestamp(data['sys']['sunset'] + data['timezone'])
             weather = data['weather'][0]['description']
@@ -84,7 +87,7 @@ async def fetch_current_weather(lat, lon):
             deg = data['wind']['deg']
             w_dir = wind_dir(deg)
             clouds = data['clouds']['all']
-            cloudiness = get_cloudiness(clouds)
+            # cloudiness = get_cloudiness(clouds)
             rain = data["rain"]["1h"] if "rain" in data.keys() else 0
             snow = data["snow"]["1h"] if "snow" in data.keys() else 0
             precip = get_precip(rain, snow)
@@ -96,7 +99,8 @@ async def fetch_current_weather(lat, lon):
             return sunset, sunrise, localnow, msg
 
 
-async def fetch_forecast(lat, lon, time):
+async def fetch_forecast(lat: str, lon: str, time: datetime) -> str:
+    """Обращается к API openwheathermap, получает прогноз погоды и формирует описание"""
     api_url = "http://api.openweathermap.org/data/2.5/forecast"
     params = {
         'lat': lat,
@@ -122,7 +126,7 @@ async def fetch_forecast(lat, lon, time):
                     deg = data['wind']['deg']
                     w_dir = wind_dir(deg)
                     clouds = data['clouds']['all']
-                    cloudiness = get_cloudiness(clouds)
+                    # cloudiness = get_cloudiness(clouds)
                     try:
                         rain = data["rain"]["1h"]
                     except KeyError:
@@ -139,7 +143,7 @@ async def fetch_forecast(lat, lon, time):
                             snow = 0
 
                     precip = get_precip(rain, snow)
-                    time = data['dt_txt']
+                    # time = data['dt_txt']
 
                     msg = f"{weather.capitalize()} {precip}\nТемпература: {temp} ℃\nДавление: {pressure}" \
                           f" мм рт. ст.\nВлажность: {humid} %\nВидимость {visib} м\nВетер {w_dir}{wind}" \

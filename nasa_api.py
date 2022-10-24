@@ -5,6 +5,7 @@ from datetime import datetime
 
 
 async def get_apod(random=True):
+    """Returns link to NASA's Astronomy picture of the day. If random = false - for today, else - for random date"""
     if random:
         now = datetime.now()
         curr_year = int(now.strftime("%Y"))

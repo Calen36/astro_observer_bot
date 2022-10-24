@@ -1,8 +1,8 @@
-from config import DEV_CHAT_ID, BANLIST
+from config import DEV_TG_ID
 from aiogram import types
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
-from astrobot import bot, dp
+from astrobot import bot
 from markups import main_kbd, location_kbd
 from geo_api import get_geodata
 from weather_api import fetch_current_weather, fetch_forecast, ru_month
@@ -69,12 +69,14 @@ async def prepare_latlon_input(message: types.Message):
 async def input_latlon(message: types.Message, state=FSMContext):
     """Parces inputed location"""
     result = await get_geodata(message.text)
+
     try:
         username = '@' + message.from_user['username']
     except KeyError:
         username = ''
 
-    if all(result):
+
+    if result and all(result):
         reply = f"Установлено местоположение:\n{result[0]}\nШирота {result[1]}\nДолгота {result[2]}"
         await update_user(message.from_user.id, result[1], result[2], result[0], username)
         await message.reply(reply, reply_markup=main_kbd)
@@ -180,7 +182,7 @@ async def input_time(message: types.Message, state=FSMContext):
     await state.finish()
     try:
         obs_time = datetime.strptime(message.text.strip(), "%d %m %Y %H %M")
-        await message.answer(obs_time)
+        await message.answer(str(obs_time))
 
         sunset, sunrise, localnow, weather_msg, userdata = await get_curr_weather(message)
         if weather_msg:
@@ -202,13 +204,14 @@ async def show_apod(message: types.Message):
 async def contact_dev(message: types.Message):
     """Forwards user's message to developer"""
     await message.reply(f"Ок, я передам")
-    await message.forward(chat_id=DEV_CHAT_ID)
+    await message.forward(chat_id=DEV_TG_ID)
     
     
 async def admin(message: types.Message):
     """Parce admin commands"""
     global BANLIST
     msg = message.text.split()
+    # послать сообщение пользовалю: SEND @username Very important message!
     if msg[0] == 'SEND':
         if msg[1].startswith('@'):
             uid = await get_uid(msg[1])
@@ -217,14 +220,16 @@ async def admin(message: types.Message):
                 await message.reply('Отправлено.')
             else:
                 await message.reply('пользователь не найден')
+    # забанить пользователя: BAN @username
     elif msg[0] == 'BAN' and msg[1].startswith('@'):
         uid = await get_uid(msg[1])
-        if uid and uid != DEV_CHAT_ID:
+        if uid and uid != DEV_TG_ID:
             await ban_user(uid)
             BANLIST = await get_banlist()
             await message.reply(f"{msg[1]} забанен")
         else:
             await message.reply(f"{msg[1]} не найден")
+    # разбанить пользователя: UNBAN @username
     elif msg[0] == 'UNBAN' and msg[1].startswith('@'):
         uid = await get_uid(msg[1])
         if uid:
@@ -233,16 +238,19 @@ async def admin(message: types.Message):
             await message.reply(f"{msg[1]} разбанен")
         else:
             await message.reply(f"{msg[1]} не найден")
+    # SHOW USERS - показывает информацию о пользователях
     elif msg[0] == 'SHOW' and msg[1] == 'USERS':
         users = await get_users()
         reply_msg = '\n'.join([' '.join(map(str, u)) for u in users])
         await message.reply(f"Всего: {len(users)}\n{reply_msg}")
+    # SHOW BANLIST - показывает забаненных
     elif msg[0] == 'SHOW' and msg[1] == 'BANLIST':
         reply_msg = await get_banned_names()
         await message.reply("\n".join(reply_msg))
 
 
-async def ban(message: types.Message):
+async def do_nothing(message: types.Message):
+    """Banned users gets this in response to their messages"""
     pass
 
 
@@ -251,5 +259,5 @@ async def test(message: types.Message):
     result = await get_user(message.from_user.id)
     print(result)
     apod_url = await get_apod()
-    apod_url+= '\nабракадабра'
+    # apod_url += '\nабракадабра'
     await message.answer(apod_url)

@@ -1,4 +1,4 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 
 main_kbd = ReplyKeyboardMarkup(resize_keyboard=True)  # one_time_keyboard=True
 b1 = KeyboardButton('Местоположение')
