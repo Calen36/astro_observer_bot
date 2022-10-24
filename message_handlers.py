@@ -1,3 +1,9 @@
+import os
+import socket
+from datetime import datetime, timezone
+from sys import platform
+
+import config
 from config import DEV_TG_ID
 from aiogram import types
 from aiogram.dispatcher.filters.state import State, StatesGroup
@@ -29,6 +35,16 @@ async def start_cmd(message: types.Message):
           "PS: А еще вы можете попросить меня показать картинку)\n\nPPS: Если вы хотите-что передать разработчику " \
           "(например, если багу изловили) - начните сообщение с букв DEV"
     await bot.send_message(message.from_user.id, msg, reply_markup=main_kbd) #  reply_markup=kb_client,
+
+
+async def sys_cmd(message: types.Message):
+    """System info. Available only for admin"""
+    if str(message.from_user.id) == config.DEV_TG_ID:
+        hostname = socket.gethostname()
+        username = os.getlogin()
+        tz_string = datetime.now(timezone.utc).astimezone().tzname()
+        msg = f"{username}@{hostname} ({platform})\nTimezone: {tz_string}"
+        await bot.send_message(message.from_user.id, msg, reply_markup=main_kbd)
 
 
 async def place_cmd(message: types.Message):
