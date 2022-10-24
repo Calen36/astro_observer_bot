@@ -40,8 +40,14 @@ async def start_cmd(message: types.Message):
 async def sys_cmd(message: types.Message):
     """System info. Available only for admin"""
     if str(message.from_user.id) == config.DEV_TG_ID:
-        hostname = socket.gethostname()
-        username = os.getlogin()
+        try:
+            hostname = socket.gethostname()
+        except:
+            hostname = 'HOSTNAME_NOT_FOUND'
+        try:
+            username = os.getlogin()
+        except:
+            username = 'USERNAME_NOT_FOUND'
         tz_string = datetime.now(timezone.utc).astimezone().tzname()
         msg = f"{username}@{hostname} ({platform})\nTimezone: {tz_string}"
         await bot.send_message(message.from_user.id, msg, reply_markup=main_kbd)
