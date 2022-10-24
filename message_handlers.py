@@ -45,7 +45,7 @@ async def sys_cmd(message: types.Message):
         except:
             hostname = 'HOSTNAME_NOT_FOUND'
         try:
-            username = os.getlogin()
+            username = os.path.basename(os.path.expanduser('~'))
         except:
             username = 'USERNAME_NOT_FOUND'
         tz_string = datetime.now(timezone.utc).astimezone().tzname()
