@@ -1,6 +1,6 @@
 import os
 import socket
-from datetime import datetime, timezone
+from datetime import timezone
 from sys import platform
 
 import config
@@ -35,22 +35,6 @@ async def start_cmd(message: types.Message):
           "PS: А еще вы можете попросить меня показать картинку)\n\nPPS: Если вы хотите-что передать разработчику " \
           "(например, если багу изловили) - начните сообщение с букв DEV"
     await bot.send_message(message.from_user.id, msg, reply_markup=main_kbd) #  reply_markup=kb_client,
-
-
-async def sys_cmd(message: types.Message):
-    """System info. Available only for admin"""
-    if str(message.from_user.id) == config.DEV_TG_ID:
-        try:
-            hostname = socket.gethostname()
-        except:
-            hostname = 'HOSTNAME_NOT_FOUND'
-        try:
-            username = os.path.basename(os.path.expanduser('~'))
-        except:
-            username = 'USERNAME_NOT_FOUND'
-        tz_string = datetime.now(timezone.utc).astimezone().tzname()
-        msg = f"{username}@{hostname} ({platform})\nTimezone: {tz_string}"
-        await bot.send_message(message.from_user.id, msg, reply_markup=main_kbd)
 
 
 async def place_cmd(message: types.Message):
@@ -96,7 +80,6 @@ async def input_latlon(message: types.Message, state=FSMContext):
         username = '@' + message.from_user['username']
     except KeyError:
         username = ''
-
 
     if result and all(result):
         reply = f"Установлено местоположение:\n{result[0]}\nШирота {result[1]}\nДолгота {result[2]}"
@@ -269,6 +252,13 @@ async def admin(message: types.Message):
     elif msg[0] == 'SHOW' and msg[1] == 'BANLIST':
         reply_msg = await get_banned_names()
         await message.reply("\n".join(reply_msg))
+    # SHOW SYS - показывает системную информацию
+    elif msg[0] == 'SHOW' and msg[1] == 'SYS':
+        hostname = socket.gethostname()
+        username = os.path.basename(os.path.expanduser('~'))
+        tz_string = datetime.now(timezone.utc).astimezone().tzname()
+        msg = f"{username}@{hostname} ({platform})\nTimezone: {tz_string}"
+        await message.reply(msg)
 
 
 async def do_nothing(message: types.Message):
